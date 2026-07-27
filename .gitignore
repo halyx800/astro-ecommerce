@@ -7,3 +7,4 @@ build-product/
 dist/
 package-lock.json
 .astro/
+.yarn/
