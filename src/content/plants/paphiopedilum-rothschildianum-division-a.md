@@ -7,7 +7,8 @@ displayName: "Paphiopedilum rothschildianum 'Division A'"
 type: "division"
 rarity: "rare"
 variants:
-  - label: "Mature division"
+  - sku: "OI-PAPHROTH-DIVA"
+    label: "Mature division"
     price: 349.99
     stockStatus: "in-stock"
     quantityAvailable: 1

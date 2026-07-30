@@ -1,0 +1,61 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../../assets/scss/astro-ecommerce.scss';
+import Navbar from '../../components/navbar';
+import ProductOverviewGrid from '../../components/products/productOverviewGrid';
+import StoreDoubleColumn from '../../components/store/storeDoubleColumn';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const plants = await getCollection('plants');
+  return plants.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+const images = data.images.map(src => `${import.meta.env.BASE_URL}${src}`);
+---
+
+<Layout title={data.displayName}>
+	<main>
+    <Navbar />
+    <div class="container mt-5">
+      <ProductOverviewGrid
+        genus={data.genus}
+        title={data.displayName}
+        images={images}
+        tags={data.tags}
+        variants={data.variants}
+      />
+
+      <div class="row mt-5">
+        <div class="col-12 col-lg-6">
+          <h4>Product Description</h4>
+          <Content />
+        </div>
+      </div>
+
+      <hr class="dark horizontal my-5" />
+
+      <div class="row">
+        <h5 class="mb-4">You might also like</h5>
+        <p class="text-body">Recommended products coming soon.</p>
+      </div>
+
+      <hr class="dark horizontal my-5" />
+
+      <div class="row">
+        <h5 class="mb-4">Reviews</h5>
+        <p class="text-body">Reviews coming soon.</p>
+      </div>
+
+      <hr class="dark horizontal my-5" />
+      <StoreDoubleColumn />
+    </div>
+  </main>
+</Layout>

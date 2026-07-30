@@ -8,10 +8,12 @@ displayName: "Oncidium Sharry Baby 'Red Fantasy'"
 type: "clone"
 rarity: "common"
 variants:
-  - label: "4-inch pot"
+  - sku: "OI-SBRF-4IN"
+    label: "4-inch pot"
     price: 24.99
     stockStatus: "in-stock"
-  - label: "6-inch pot"
+  - sku: "OI-SBRF-6IN"
+    label: "6-inch pot"
     price: 44.99
     stockStatus: "in-stock"
 stockStatus: "in-stock"

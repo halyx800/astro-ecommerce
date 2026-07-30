@@ -2,10 +2,12 @@
 name: "Keiki Power Pro Cloning Paste"
 category: "hormones"
 variants:
-  - label: "5g tube"
+  - sku: "OI-KPP-5g"
+    label: "5g tube"
     price: 12.99
     stockStatus: "in-stock"
-  - label: "15g tube"
+  - sku: "OI-KPP-15g"
+    label: "15g tube"
     price: 28.99
     stockStatus: "in-stock"
 stockStatus: "in-stock"

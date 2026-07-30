@@ -111,6 +111,37 @@ build territory — no database needed, no performance concern at this scale.
   - Whether the top-level `stockStatus` field (in addition to per-variant
     stockStatus) is worth the duplication — flagged to the owner as a design
     choice they may want simplified.
+  - **Inventory concurrency / reservation (raised 2026-07-30):** the
+    "rebuild-on-change" model (stock edits = edit file + git push + CI
+    rebuild) only covers slow, occasional stock changes. It can't arbitrate
+    a flash sale — e.g. a fixed qty of 10 emailed to the customer list,
+    expected to sell out over ~24 hours with many buyers hitting checkout
+    concurrently. Nothing today connects a variant's `quantityAvailable` to
+    any payment provider; whatever creates the checkout session needs to
+    atomically check-and-decrement a *live* counter at the moment of
+    purchase, not read a value baked in at the last rebuild. Two directions
+    discussed:
+    - Provider-native limits (e.g. Stripe Payment Links' "limit the number
+      of payments") — simplest, but ties inventory enforcement to one
+      provider's feature set.
+    - A self-maintained reservation layer (reserve → redirect to whichever
+      payment provider → confirm via webhook, or release on
+      timeout/failure) — provider-agnostic, so switching between
+      Stripe/Square/PayPal later wouldn't touch inventory logic. **Owner is
+      explicitly not committed to Stripe** as the final payment provider,
+      so this is the leaning direction.
+
+    Whether the reservation counter can just be "a file on the server"
+    depends on the eventual hosting choice: fine on a persistent always-on
+    process (atomic in-process writes, or something like SQLite with real
+    transactions), but NOT safe as a plain flat file under serverless
+    functions (Vercel/Netlify/Cloudflare Functions are stateless and
+    horizontally scaled — concurrent invocations don't share a local
+    filesystem, so naive concurrent file reads/writes will race and
+    oversell). If serverless hosting is chosen, this needs a small external
+    atomic store (hosted KV/Redis/tiny DB) instead of a literal file. Not
+    yet decided — ties directly into the still-open deployment target
+    decision above.
 
 ---
 
@@ -252,28 +283,77 @@ build` after installing dependencies.
 
 ---
 
-## 9. Next steps (not yet started)
+## 9. Next steps
 
 In rough order of dependency:
 
-1. Run `yarn install` on the VM (now that `.yarnrc.yml` is set) and confirm
-   `yarn astro sync` + `yarn astro build` succeed against the rebuilt
-   content collections.
-2. Wire `cardProduct.tsx` and `productSizes.tsx` up to real collection data
-   (extend props for genus/tags/variants; add per-variant price to
-   `productSizes`).
-3. Convert `product.astro` into a dynamic `[slug].astro` route via
-   `getStaticPaths()` over the `plants` + `supplies` collections.
+1. ~~Run `yarn install` on the VM... confirm `yarn astro sync` + `yarn astro
+   build` succeed.~~ **Done (2026-07-29/30).**
+2. ~~Wire `cardProduct.tsx` and `productSizes.tsx` up to real collection
+   data.~~ **Done (2026-07-30).** Both now accept optional `genus`/`tags`/
+   `variants` props alongside the original apparel-shaped props (additive,
+   nothing existing broke — verified via `yarn build`). Also added a
+   required `sku: z.string()` field on the shared `variant` schema (format
+   `OI-{ABBREV}-{SIZE}`, e.g. `OI-KPP-5g` — a plain string, no format
+   enforced in the schema itself, so the convention can change later
+   without a schema edit). `content.config.ts` was also refactored so
+   `plants`/`supplies` both `.extend()` one shared `baseProduct` Zod schema
+   (`variants`/`stockStatus`/`tags`/`images`/`featured`) instead of
+   duplicating those fields — a future product type just extends the same
+   base.
+3. **In progress:** convert `product.astro` into dynamic routes —
+   **decided: separate `/plants/[slug]` and `/supplies/[slug]`** (not one
+   shared `/product/[slug]`), via `getStaticPaths()` per collection. Chosen
+   over a shared route to avoid slug-collision risk across collections and
+   to keep each template free of type-branching logic. Known gaps found
+   while investigating this page, to be handled as part of this work:
+   - `productGallery.tsx` hardcodes exactly 4 images as `{src, alt}`
+     objects (`images[0..3].src`) — will crash on real entries, which have
+     `images: string[]` (plain paths, often just 1). Needs a real rewrite,
+     not just new props.
+   - `productOverviewGrid.tsx` still only accepts the old apparel-shaped
+     props (`colors`/`full_description`/`highlights`/`details`/`rating`/
+     `reviews`/`sizes: Map`) — needs the same additive extension already
+     done for `cardProduct`/`productSizes`.
+   - Pre-existing bug, unrelated to this migration: `productOverviewGrid.tsx`
+     checks `price.length != 0` where `price` is a `number` — always
+     falsy, so the demo's own price display silently never renders today.
+   - **Decided:** the bottom "customers also purchased" grid and the
+     ratings/reviews section (both `data.json`-driven, no schema
+     equivalent) will be **kept as visual placeholders** for now so page
+     layout doesn't shift — not wired to real logic yet. See below for
+     the intended direction for each.
 4. Build genus/category listing pages and tag index pages (net new pages,
    reusing existing layout/component styling) — this replaces
    `categoryFilters.tsx`'s hardcoded logic with real filtering.
 5. Build blog listing + article detail pages from the `articles` collection.
 6. Build real cart state (client-side store, e.g. nanostores) and wire the
    Checkout button to a Stripe Checkout Session (small serverless function —
-   deployment target/adapter still to be chosen).
+   deployment target/adapter still to be chosen). See §3's inventory
+   concurrency note — needs deciding alongside hosting.
 7. Decide + implement: guest-only checkout vs. accounts; final social media
    approach; logo integration; sourcing real product photography (frontmatter
    image paths are currently placeholders, no actual image files yet).
+
+**Recommended products (raised 2026-07-30):** owner wants this to be a
+**hand-curated mapping**, not an algorithm — e.g. "Dendrobium kingianum
+buyers frequently also like Cattleya aurantiaca" is domain knowledge only
+the owner has, not something derivable from tags/genus alone. Likely
+implementation: a small hand-edited file (per-listing list of related
+slugs, or a simple lookup table) rather than any "similar items" logic.
+Not built yet — the current product-page work only stubs a placeholder
+where this will go.
+
+**Reviews (raised 2026-07-30):** deferred, no data source or design yet.
+One thing flagged for later: real reviews normally come from customers
+submitting whenever they want, which doesn't fit the flat-file
+rebuild-on-push model any better than live inventory changes do (same
+tension as the inventory concurrency note in §3) — unless the owner is
+the one hand-entering reviews (copy a review in, commit, rebuild), which
+would fit this architecture cleanly and mirrors the hand-curated
+recommended-products approach above. Live customer-submitted reviews
+would need a real discussion (probably a live backend endpoint) when/if
+that's wanted.
 
 ---
 

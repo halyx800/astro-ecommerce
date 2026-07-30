@@ -1,25 +1,36 @@
+type ImageInput = string | { src: string; alt: string };
+
 interface Props {
-  images: ({
-    src: string;
-    alt: string;
-  })[];
+  images: ImageInput[];
 }
 
 export default function ProductGallery({
   images,
 }: Props) {
 
+  const normalized = images.map((img, i) =>
+    typeof img === "string" ? { src: img, alt: `Product image ${i + 1}` } : img
+  );
+
+  if (normalized.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <div className="col-12 col-lg-6 d-flex">
         <div className="d-block">
-          <img className="w-90 max-height-150 mb-4 rounded-2" src={images[0].src} alt={images[0].alt} />
-          <img className="w-90 max-height-150 mb-4 rounded-2" src={images[1].src} alt={images[1].alt} />
-          <img className="w-90 max-height-150 mb-4 rounded-2" src={images[2].src} alt={images[2].alt} />
-          <img className="w-90 max-height-150 rounded-2" src={images[3].src} alt={images[3].alt} />
+          {normalized.map((img, i) =>
+            <img
+              key={img.src}
+              className={"w-90 max-height-150 rounded-2" + (i < normalized.length - 1 ? " mb-4" : "")}
+              src={img.src}
+              alt={img.alt}
+            />
+          )}
         </div>
-        <img className="w-70 rounded-2" src={images[0].src} alt={images[0].alt} />
-      </div> 
+        <img className="w-70 rounded-2" src={normalized[0].src} alt={normalized[0].alt} />
+      </div>
     </>
   );
 }

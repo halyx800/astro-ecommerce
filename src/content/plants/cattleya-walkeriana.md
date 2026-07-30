@@ -7,7 +7,8 @@ displayName: "Cattleya walkeriana"
 type: "seedling"
 rarity: "uncommon"
 variants:
-  - label: "Blooming size, 4-inch pot"
+  - sku: "OI-CATWALK-4IN"
+    label: "Blooming size, 4-inch pot"
     price: 39.99
     stockStatus: "low-stock"
 stockStatus: "low-stock"
