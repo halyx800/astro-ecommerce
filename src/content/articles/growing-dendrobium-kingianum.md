@@ -1,6 +1,5 @@
 ---
 title: "Growing Dendrobium kingianum: A Beginner's Guide"
-category: "growing"
 publishDate: 2026-05-20
 tags: ["deciduous", "easy-to-grow"]
 coverImage: "/images/articles/dendrobium-kingianum-1.jpg"

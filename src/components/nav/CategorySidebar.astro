@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import { slugify } from '../../lib/slugify';
+
+const plants = await getCollection('plants');
+const supplies = await getCollection('supplies');
+
+const genusCounts = new Map<string, number>();
+for (const entry of plants) {
+  genusCounts.set(entry.data.genus, (genusCounts.get(entry.data.genus) ?? 0) + 1);
+}
+const genera = Array.from(genusCounts.entries())
+  .map(([genus, count]) => ({ genus, slug: slugify(genus), count }))
+  .sort((a, b) => a.genus.localeCompare(b.genus));
+
+const speciesCount = plants.filter(entry => entry.data.taxonomicStatus === 'species').length;
+
+const categoryCounts = new Map<string, number>();
+for (const entry of supplies) {
+  categoryCounts.set(entry.data.category, (categoryCounts.get(entry.data.category) ?? 0) + 1);
+}
+const categories = Array.from(categoryCounts.entries())
+  .map(([category, count]) => ({ category, slug: slugify(category), count }))
+  .sort((a, b) => a.category.localeCompare(b.category));
+---
+
+<nav class="mb-5">
+  <h6 class="w-100 pb-3 border-bottom">Orchids</h6>
+  <ul class="nav flex-column ms-n3 mb-4">
+    {genera.map(({ genus, slug, count }) =>
+      <li class="nav-item">
+        <a class="nav-link text-body text-sm font-weight-bold text-decoration-underline" href={`${import.meta.env.BASE_URL}/plants/genus/${slug}/`}>
+          {genus} <span class="text-body text-sm">({count})</span>
+        </a>
+      </li>
+    )}
+  </ul>
+
+  {(speciesCount > 0) &&
+    <>
+      <h6 class="w-100 pb-3 border-bottom">Species</h6>
+      <ul class="nav flex-column ms-n3 mb-4">
+        <li class="nav-item">
+          <a class="nav-link text-body text-sm font-weight-bold text-decoration-underline" href={`${import.meta.env.BASE_URL}/plants/species/`}>
+            All Species <span class="text-body text-sm">({speciesCount})</span>
+          </a>
+        </li>
+      </ul>
+    </>
+  }
+
+  {(categories.length > 0) &&
+    <>
+      <h6 class="w-100 pb-3 border-bottom">Supplies</h6>
+      <ul class="nav flex-column ms-n3">
+        {categories.map(({ category, slug, count }) =>
+          <li class="nav-item">
+            <a class="nav-link text-body text-sm font-weight-bold text-decoration-underline text-capitalize" href={`${import.meta.env.BASE_URL}/supplies/category/${slug}/`}>
+              {category} <span class="text-body text-sm">({count})</span>
+            </a>
+          </li>
+        )}
+      </ul>
+    </>
+  }
+</nav>

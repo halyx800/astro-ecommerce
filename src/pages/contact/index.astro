@@ -1,0 +1,54 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../../assets/scss/astro-ecommerce.scss';
+import Navbar from '../../components/navbar';
+import { BUSINESS } from '../../lib/businessInfo';
+
+const mapQuery = encodeURIComponent(
+  `${BUSINESS.streetAddress}, ${BUSINESS.addressLocality}, ${BUSINESS.addressRegion} ${BUSINESS.postalCode}`
+);
+---
+
+<Layout title="Contact" description={`Visit or contact ${BUSINESS.name} in ${BUSINESS.addressLocality}, ${BUSINESS.addressRegion}.`}>
+	<main>
+    <Navbar client:load />
+    <div class="container mt-5">
+      <h2 class="mb-4">Contact Us</h2>
+
+      <div class="row">
+        <div class="col-12 col-lg-5 mb-4">
+          <h6 class="border-bottom pb-2 mb-3">{BUSINESS.name}</h6>
+
+          <p class="mb-2">
+            {BUSINESS.streetAddress}<br />
+            {BUSINESS.addressLocality}, {BUSINESS.addressRegion} {BUSINESS.postalCode}
+          </p>
+
+          <p class="mb-2">
+            <a href={`tel:${BUSINESS.phoneE164}`} class="text-dark text-decoration-underline">{BUSINESS.phoneDisplay}</a>
+          </p>
+
+          <p class="mb-4">
+            <a href={`mailto:${BUSINESS.email}`} class="text-dark text-decoration-underline">{BUSINESS.email}</a>
+          </p>
+
+          <h6 class="border-bottom pb-2 mb-3">Hours</h6>
+          <p class="text-body">
+            Set hours coming soon — also available by appointment. Contact us to schedule a visit.
+          </p>
+        </div>
+
+        <div class="col-12 col-lg-7 mb-4">
+          <iframe
+            title="Map to Orchid Insanity"
+            width="100%"
+            height="400"
+            style="border:0"
+            loading="lazy"
+            src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}>
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,49 @@
+---
+import BrowseLayout from '../../layouts/BrowseLayout.astro';
+import CardProduct from '../../components/products/cardProduct';
+import { getCollection } from 'astro:content';
+
+const plants = await getCollection('plants');
+const supplies = await getCollection('supplies');
+
+const items = [
+  ...plants.map(entry => ({
+    kind: 'plants' as const,
+    id: entry.id,
+    title: entry.data.displayName,
+    genus: entry.data.genus,
+    tags: entry.data.tags,
+    images: entry.data.images,
+    variants: entry.data.variants,
+  })),
+  ...supplies.map(entry => ({
+    kind: 'supplies' as const,
+    id: entry.id,
+    title: entry.data.name,
+    genus: undefined,
+    tags: entry.data.tags,
+    images: entry.data.images,
+    variants: entry.data.variants,
+  })),
+].sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<BrowseLayout title="Shop">
+  <h2 class="mb-4">Shop</h2>
+  <div class="row">
+    {items.map(item =>
+      <div class="col-md-6 col-lg-4">
+        <CardProduct
+          thumb_src={item.images[0] ?? ''}
+          thumb_alt={item.title}
+          title={item.title}
+          genus={item.genus}
+          tags={item.tags}
+          variants={item.variants}
+          position="left"
+          href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+        />
+      </div>
+    )}
+  </div>
+</BrowseLayout>

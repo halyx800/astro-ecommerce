@@ -1,10 +1,10 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import '../../../assets/scss/astro-ecommerce.scss';
-import Navbar from '../../components/navbar';
+import BrowseLayout from '../../layouts/BrowseLayout.astro';
 import ProductOverviewGrid from '../../components/products/productOverviewGrid';
-import StoreDoubleColumn from '../../components/store/storeDoubleColumn';
-import { getCollection, render } from 'astro:content';
+import CardProduct from '../../components/products/cardProduct';
+import { getCollection, getEntries, render } from 'astro:content';
+import { makeExcerpt } from '../../lib/excerpt';
+import { buildProductSchema } from '../../lib/productSchema';
 
 export async function getStaticPaths() {
   const supplies = await getCollection('supplies');
@@ -19,42 +19,82 @@ const { data } = entry;
 const { Content } = await render(entry);
 
 const images = data.images.map(src => `${import.meta.env.BASE_URL}${src}`);
+
+const pageUrl = new URL(`${import.meta.env.BASE_URL}/supplies/${entry.id}/`, "https://www.orchidinsanity.com").toString();
+const productSchema = buildProductSchema({
+  name: data.name,
+  description: makeExcerpt(entry.body ?? ''),
+  url: pageUrl,
+  images: images.map(src => new URL(src, "https://www.orchidinsanity.com").toString()),
+  variants: data.variants,
+  stockStatus: data.stockStatus,
+});
+
+const relatedEntries = data.relatedProducts.length > 0
+  ? await getEntries(data.relatedProducts.map(r => r.id))
+  : [];
+const related = relatedEntries.map(r => ({
+  kind: r.collection,
+  id: r.id,
+  title: r.collection === 'plants' ? r.data.displayName : r.data.name,
+  genus: r.collection === 'plants' ? r.data.genus : undefined,
+  tags: r.data.tags,
+  images: r.data.images,
+  variants: r.data.variants,
+}));
 ---
 
-<Layout title={data.name}>
-	<main>
-    <Navbar />
-    <div class="container mt-5">
-      <ProductOverviewGrid
-        title={data.name}
-        images={images}
-        tags={data.tags}
-        variants={data.variants}
-      />
+<BrowseLayout
+  title={data.name}
+  description={makeExcerpt(entry.body ?? '')}
+  image={data.images[0]}
+  ogTitle={data.ogTitle}
+  ogDescription={data.ogDescription}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(productSchema)} />
 
-      <div class="row mt-5">
-        <div class="col-12 col-lg-6">
-          <h4>Product Description</h4>
-          <Content />
-        </div>
-      </div>
+  <ProductOverviewGrid
+    client:load
+    title={data.name}
+    images={images}
+    tags={data.tags}
+    variants={data.variants}
+    href={`${import.meta.env.BASE_URL}/supplies/${entry.id}/`}
+  />
 
-      <hr class="dark horizontal my-5" />
-
-      <div class="row">
-        <h5 class="mb-4">You might also like</h5>
-        <p class="text-body">Recommended products coming soon.</p>
-      </div>
-
-      <hr class="dark horizontal my-5" />
-
-      <div class="row">
-        <h5 class="mb-4">Reviews</h5>
-        <p class="text-body">Reviews coming soon.</p>
-      </div>
-
-      <hr class="dark horizontal my-5" />
-      <StoreDoubleColumn />
+  <div class="row mt-5">
+    <div class="col-12 col-lg-6">
+      <h4>Product Description</h4>
+      <Content />
     </div>
-  </main>
-</Layout>
+  </div>
+
+  <hr class="dark horizontal my-5" />
+
+  {(related.length > 0) &&
+    <div class="row">
+      <h5 class="mb-4">You might also like</h5>
+      {related.map(item =>
+        <div class="col-md-6 col-lg-4">
+          <CardProduct
+            thumb_src={item.images[0] ?? ''}
+            thumb_alt={item.title}
+            title={item.title}
+            genus={item.genus}
+            tags={item.tags}
+            variants={item.variants}
+            position="left"
+            href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+          />
+        </div>
+      )}
+    </div>
+  }
+
+  <hr class="dark horizontal my-5" />
+
+  <div class="row">
+    <h5 class="mb-4">Reviews</h5>
+    <p class="text-body">Reviews coming soon.</p>
+  </div>
+</BrowseLayout>

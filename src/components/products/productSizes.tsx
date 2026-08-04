@@ -9,11 +9,15 @@ interface Variant {
 interface Props {
   sizes?: Map<string,number>;
   variants?: Variant[];
+  selected?: string;
+  onSelect?: (sku: string) => void;
 }
 
 export default function ProductSizes({
   sizes,
   variants,
+  selected,
+  onSelect,
 }: Props) {
 
   const sizeID = Date.now();
@@ -27,10 +31,17 @@ export default function ProductSizes({
       <div className="d-flex flex-wrap text-center my-4">
         {variants ? variants.map((variant, i) =>
 
-        <div className="mb-3 me-3" key={variant.label}>
+        <div className="mb-3 me-3" key={variant.sku}>
           <div className="form-check">
             {(variant.stockStatus !== "sold-out") ?
-              <input className="form-check-input rounded-2" type="radio" name="flexRadioDefault" id={`input`+ sizeID + i} />
+              <input
+                className="form-check-input rounded-2"
+                type="radio"
+                name="flexRadioDefault"
+                id={`input`+ sizeID + i}
+                checked={variant.sku === selected}
+                onChange={() => onSelect?.(variant.sku)}
+              />
             :
               <input className="form-check-input rounded-2" disabled type="radio" name="flexRadioDefault" id={`input`+ sizeID + i} />
             }

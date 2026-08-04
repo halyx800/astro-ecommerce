@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.orchidinsanity.com/astro-ecommerce/sitemap-index.xml

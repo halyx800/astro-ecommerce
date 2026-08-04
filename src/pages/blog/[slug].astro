@@ -1,0 +1,114 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../../assets/scss/astro-ecommerce.scss';
+import Navbar from '../../components/navbar';
+import CardProduct from '../../components/products/cardProduct';
+import { getCollection, getEntries, render } from 'astro:content';
+import { slugify } from '../../lib/slugify';
+import { makeExcerpt } from '../../lib/excerpt';
+import { buildArticleSchema } from '../../lib/articleSchema';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blogPosts');
+  return posts.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+const pageUrl = new URL(`${import.meta.env.BASE_URL}/blog/${entry.id}/`, "https://www.orchidinsanity.com").toString();
+const articleSchema = buildArticleSchema({
+  type: "BlogPosting",
+  headline: data.title,
+  description: makeExcerpt(entry.body ?? ''),
+  url: pageUrl,
+  image: data.coverImage ? new URL(`${import.meta.env.BASE_URL}${data.coverImage}`, "https://www.orchidinsanity.com").toString() : undefined,
+  datePublished: data.publishDate,
+});
+
+const mentionedEntries = data.mentionedProducts.length > 0
+  ? await getEntries(data.mentionedProducts.map(r => r.id))
+  : [];
+const mentioned = mentionedEntries.map(r => ({
+  kind: r.collection,
+  id: r.id,
+  title: r.collection === 'plants' ? r.data.displayName : r.data.name,
+  genus: r.collection === 'plants' ? r.data.genus : undefined,
+  tags: r.data.tags,
+  images: r.data.images,
+  variants: r.data.variants,
+}));
+---
+
+<Layout
+  title={data.title}
+  description={makeExcerpt(entry.body ?? '')}
+  image={data.coverImage}
+  ogTitle={data.ogTitle}
+  ogDescription={data.ogDescription}
+  type="article"
+>
+	<main>
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+    <Navbar client:load />
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12 col-lg-8">
+          {(data.coverImage) &&
+            <img
+              class="w-100 rounded-3 mb-4"
+              src={`${import.meta.env.BASE_URL}${data.coverImage}`}
+              alt={data.title}
+            />
+          }
+          <h1>{data.title}</h1>
+          <p class="text-body text-sm">
+            {data.publishDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+
+          {(data.tags.length > 0) &&
+            <div class="mb-4">
+              {data.tags.map(tag =>
+                <a href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} class="badge bg-secondary me-1 text-decoration-none">{tag}</a>
+              )}
+            </div>
+          }
+
+          <Content />
+
+          {(data.videoUrl) &&
+            <p class="mt-4">
+              <a href={data.videoUrl} target="_blank" rel="noopener" class="font-weight-bold text-decoration-underline">
+                Watch the video &#8599;
+              </a>
+            </p>
+          }
+        </div>
+      </div>
+
+      {(mentioned.length > 0) &&
+        <div class="row mt-5">
+          <h5 class="mb-4">Shop this post</h5>
+          {mentioned.map(item =>
+            <div class="col-md-6 col-lg-3">
+              <CardProduct
+                thumb_src={item.images[0] ?? ''}
+                thumb_alt={item.title}
+                title={item.title}
+                genus={item.genus}
+                tags={item.tags}
+                variants={item.variants}
+                position="left"
+                href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+              />
+            </div>
+          )}
+        </div>
+      }
+    </div>
+  </main>
+</Layout>

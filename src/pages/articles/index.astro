@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../../assets/scss/astro-ecommerce.scss';
+import Navbar from '../../components/navbar';
+import ArticleTeaser from '../../components/articles/articleTeaser';
+import { getCollection } from 'astro:content';
+import { makeExcerpt } from '../../lib/excerpt';
+
+const articles = (await getCollection('articles'))
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+const posts = (await getCollection('blogPosts'))
+  .sort((a, b) => {
+    const pa = a.data.priority ?? -Infinity;
+    const pb = b.data.priority ?? -Infinity;
+    if (pa !== pb) return pb - pa;
+    return b.data.publishDate.valueOf() - a.data.publishDate.valueOf();
+  });
+---
+
+<Layout title="Blog &amp; Articles">
+	<main>
+    <Navbar client:load />
+    <div class="container mt-5">
+      <h2 class="mb-4">Articles</h2>
+      <div class="col-12 col-lg-8 mb-10">
+        {(articles.length === 0) &&
+          <p class="text-body">No articles yet.</p>
+        }
+        {articles.map(entry =>
+          <ArticleTeaser
+            title={entry.data.title}
+            excerpt={entry.data.excerpt}
+            coverImage={entry.data.coverImage}
+            publishDate={entry.data.publishDate}
+            href={`${import.meta.env.BASE_URL}/articles/${entry.id}/`}
+          />
+        )}
+      </div>
+
+      <h2 class="mb-4">Blog Posts</h2>
+      <div class="col-12 col-lg-8">
+        {(posts.length === 0) &&
+          <p class="text-body">No posts yet.</p>
+        }
+        {posts.map(entry =>
+          <ArticleTeaser
+            title={entry.data.title}
+            excerpt={makeExcerpt(entry.body ?? '')}
+            coverImage={entry.data.coverImage}
+            publishDate={entry.data.publishDate}
+            href={`${import.meta.env.BASE_URL}/blog/${entry.id}/`}
+          />
+        )}
+      </div>
+    </div>
+  </main>
+</Layout>

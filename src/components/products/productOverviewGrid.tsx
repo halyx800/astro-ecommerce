@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import ProductRating from '../reviews/reviewRating'
 import ProductGallery from './productGallery'
 import ProductSizes from './productSizes'
+import { slugify } from '../../lib/slugify';
+import { addToCart } from '../../lib/cart';
 
 interface Variant {
   sku: string;
@@ -24,6 +27,7 @@ interface Props {
   genus?: string;
   tags?: string[];
   variants?: Variant[];
+  href?: string;
 }
 
 export default function ProductOverview({
@@ -39,8 +43,43 @@ export default function ProductOverview({
   sizes,
   genus,
   tags,
-  variants
+  variants,
+  href
 }: Props) {
+
+  const firstAvailable = variants?.find(v => v.stockStatus !== "sold-out") ?? variants?.[0];
+  const [selectedSku, setSelectedSku] = useState<string | undefined>(firstAvailable?.sku);
+  const [added, setAdded] = useState(false);
+
+  const selectedVariant = variants?.find(v => v.sku === selectedSku);
+
+  const thumb_src = images.length > 0
+    ? (typeof images[0] === "string" ? images[0] : images[0].src)
+    : '';
+
+  // Give real, descriptive alt text (the product's actual name) instead of
+  // ProductGallery's generic "Product image N" fallback — matters for
+  // accessibility and image-search visibility.
+  const galleryImages = images.map((img, i) => {
+    const src = typeof img === "string" ? img : img.src;
+    const alt = typeof img === "string"
+      ? (i === 0 ? title : `${title} — additional photo ${i + 1}`)
+      : img.alt;
+    return { src, alt };
+  });
+
+  function handleAddToCart() {
+    if (!selectedVariant || selectedVariant.stockStatus === "sold-out") return;
+    addToCart({
+      sku: selectedVariant.sku,
+      title: `${title} — ${selectedVariant.label}`,
+      price: selectedVariant.price,
+      thumb_src,
+      href: href ?? '',
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  }
 
   const priceLabel = (() => {
     if (variants && variants.length > 0) {
@@ -58,15 +97,15 @@ export default function ProductOverview({
     <>
     <div className="card card-product card-plain">
       <div className="row">
-        {(images.length != 0) && 
-          <ProductGallery images={images}/>
+        {(images.length != 0) &&
+          <ProductGallery images={galleryImages}/>
         }
         <div className="col-12 col-lg-6 ps-lg-5">
           {(genus) &&
             <h6 className="text-md mb-1 text-body">{genus}</h6>
           }
           {(title.length != 0) &&
-            <h2 className="mt-4">{title}</h2>
+            <h1 className="h2 mt-4">{title}</h1>
           }
           {(full_description) &&
             <p className="mb-5">{full_description}</p>
@@ -75,7 +114,7 @@ export default function ProductOverview({
           {(tags && tags.length > 0) &&
             <div className="mb-3">
               {tags.map(tag => (
-                <span key={tag} className="badge bg-secondary me-1">{tag}</span>
+                <a key={tag} href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} className="badge bg-secondary me-1 text-decoration-none">{tag}</a>
               ))}
             </div>
           }
@@ -98,12 +137,23 @@ export default function ProductOverview({
             }
 
             {(variants && variants.length > 0) &&
-              <ProductSizes variants={variants}/>
+              <ProductSizes variants={variants} selected={selectedSku} onSelect={setSelectedSku}/>
             }
             {(!variants && sizes && sizes.size != 0) &&
               <ProductSizes sizes={sizes}/>
             }
-            <button className="btn btn-dark btn-lg" type="submit">Add to cart</button>
+            {(variants && variants.length > 0) ?
+              <button
+                className="btn btn-dark btn-lg"
+                type="button"
+                disabled={!selectedVariant || selectedVariant.stockStatus === "sold-out"}
+                onClick={handleAddToCart}
+              >
+                {added ? "Added!" : (selectedVariant?.stockStatus === "sold-out" ? "Sold Out" : "Add to cart")}
+              </button>
+            :
+              <button className="btn btn-dark btn-lg" type="submit">Add to cart</button>
+            }
           </form>
         </div>
       </div>

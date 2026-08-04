@@ -1,0 +1,27 @@
+---
+import BrowseLayout from '../../../layouts/BrowseLayout.astro';
+import CardProduct from '../../../components/products/cardProduct';
+import { getCollection } from 'astro:content';
+
+const entries = (await getCollection('plants')).filter(entry => entry.data.taxonomicStatus === 'species');
+---
+
+<BrowseLayout title="Species">
+  <h2 class="mb-4">Species</h2>
+  <div class="row">
+    {entries.map(entry =>
+      <div class="col-md-6 col-lg-4">
+        <CardProduct
+          thumb_src={entry.data.images[0] ?? ''}
+          thumb_alt={entry.data.displayName}
+          title={entry.data.displayName}
+          genus={entry.data.genus}
+          tags={entry.data.tags}
+          variants={entry.data.variants}
+          position="left"
+          href={`${import.meta.env.BASE_URL}/plants/${entry.id}/`}
+        />
+      </div>
+    )}
+  </div>
+</BrowseLayout>

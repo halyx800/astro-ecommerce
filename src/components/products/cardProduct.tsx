@@ -1,4 +1,5 @@
 import ProductBadge from './productBadge';
+import { slugify } from '../../lib/slugify';
 
 interface Variant {
   sku: string;
@@ -12,7 +13,7 @@ interface Props {
   thumb_src: string;
   thumb_alt: string;
   title: string;
-  description: string;
+  description?: string;
   price?: number;
   color?: string;
   colors?: string[];
@@ -20,6 +21,7 @@ interface Props {
   genus?: string;
   tags?: string[];
   variants?: Variant[];
+  href?: string;
 }
 
 export default function CardProduct({
@@ -33,7 +35,8 @@ export default function CardProduct({
   position,
   genus,
   tags,
-  variants
+  variants,
+  href
 }: Props) {
 
   const classList = "card-body " + "text-" + position;
@@ -53,7 +56,7 @@ export default function CardProduct({
   return (
     <>
       <div className="card card-product border mb-5 shadow-xs border-radius-lg">
-        <a href="#">
+        <a href={href ?? "#"}>
           <div className="height-350">
             <img className="w-100 h-100 p-4 rounded-top" src={`${import.meta.env.BASE_URL}${thumb_src}`} alt={thumb_alt} />
           </div>
@@ -81,7 +84,7 @@ export default function CardProduct({
             {(tags && tags.length > 0) &&
               <div className="mb-2">
                 {tags.map(tag => (
-                  <span key={tag} className="badge bg-secondary me-1">{tag}</span>
+                  <a key={tag} href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} className="badge bg-secondary me-1 text-decoration-none">{tag}</a>
                 ))}
               </div>
             }
@@ -93,7 +96,7 @@ export default function CardProduct({
             }
 
             {!(description || colors || color) &&
-              <a href="#" className="font-weight-normal text-body text-sm">Shop Now</a>
+              <a href={href ?? "#"} className="font-weight-normal text-body text-sm">Shop Now</a>
             }
           </div>
         </a>

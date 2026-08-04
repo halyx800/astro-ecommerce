@@ -1,7 +1,7 @@
 ---
 genus: "Paphiopedilum"
 species: "rothschildianum"
-isHybrid: false
+taxonomicStatus: "species"
 commonName: "Rothschild's Slipper Orchid"
 displayName: "Paphiopedilum rothschildianum 'Division A'"
 type: "division"

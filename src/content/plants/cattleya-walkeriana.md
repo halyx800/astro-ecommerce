@@ -1,7 +1,7 @@
 ---
 genus: "Cattleya"
 species: "walkeriana"
-isHybrid: false
+taxonomicStatus: "species"
 commonName: "Walker's Cattleya"
 displayName: "Cattleya walkeriana"
 type: "seedling"
@@ -16,6 +16,9 @@ tags: ["fragrant blooms"]
 images: ["/images/plants/cattleya-walkeriana-1.jpg"]
 featured: false
 publishDate: 2026-06-15
+relatedProducts:
+  - collection: "plants"
+    id: "oncidium-sharry-baby-red-fantasy"
 ---
 
 A compact Brazilian species prized for its large, intensely fragrant

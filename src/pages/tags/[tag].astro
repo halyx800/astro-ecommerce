@@ -1,0 +1,147 @@
+---
+import BrowseLayout from '../../layouts/BrowseLayout.astro';
+import CardProduct from '../../components/products/cardProduct';
+import ArticleTeaser from '../../components/articles/articleTeaser';
+import { getCollection } from 'astro:content';
+import { slugify } from '../../lib/slugify';
+import { makeExcerpt } from '../../lib/excerpt';
+
+export async function getStaticPaths() {
+  const plants = await getCollection('plants');
+  const supplies = await getCollection('supplies');
+  const articleEntries = await getCollection('articles');
+  const postEntries = await getCollection('blogPosts');
+
+  const products = [
+    ...plants.map(entry => ({
+      kind: 'plants' as const,
+      id: entry.id,
+      title: entry.data.displayName,
+      genus: entry.data.genus,
+      tags: entry.data.tags,
+      images: entry.data.images,
+      variants: entry.data.variants,
+    })),
+    ...supplies.map(entry => ({
+      kind: 'supplies' as const,
+      id: entry.id,
+      title: entry.data.name,
+      genus: undefined,
+      tags: entry.data.tags,
+      images: entry.data.images,
+      variants: entry.data.variants,
+    })),
+  ];
+
+  const articles = articleEntries.map(entry => ({
+    id: entry.id,
+    title: entry.data.title,
+    excerpt: entry.data.excerpt,
+    coverImage: entry.data.coverImage,
+    publishDate: entry.data.publishDate,
+    tags: entry.data.tags,
+  }));
+
+  const posts = postEntries.map(entry => ({
+    id: entry.id,
+    title: entry.data.title,
+    excerpt: makeExcerpt(entry.body ?? ''),
+    coverImage: entry.data.coverImage,
+    publishDate: entry.data.publishDate,
+    tags: entry.data.tags,
+  }));
+
+  const bySlug = new Map<string, { tagName: string; products: typeof products; articles: typeof articles; posts: typeof posts }>();
+
+  for (const item of products) {
+    for (const tag of item.tags) {
+      const slug = slugify(tag);
+      if (!bySlug.has(slug)) bySlug.set(slug, { tagName: tag, products: [], articles: [], posts: [] });
+      bySlug.get(slug)!.products.push(item);
+    }
+  }
+  for (const article of articles) {
+    for (const tag of article.tags) {
+      const slug = slugify(tag);
+      if (!bySlug.has(slug)) bySlug.set(slug, { tagName: tag, products: [], articles: [], posts: [] });
+      bySlug.get(slug)!.articles.push(article);
+    }
+  }
+  for (const post of posts) {
+    for (const tag of post.tags) {
+      const slug = slugify(tag);
+      if (!bySlug.has(slug)) bySlug.set(slug, { tagName: tag, products: [], articles: [], posts: [] });
+      bySlug.get(slug)!.posts.push(post);
+    }
+  }
+
+  return Array.from(bySlug.entries()).map(([slug, { tagName, products, articles, posts }]) => ({
+    params: { tag: slug },
+    props: {
+      tagName,
+      products,
+      articles: articles.sort((a, b) => b.publishDate.valueOf() - a.publishDate.valueOf()),
+      posts: posts.sort((a, b) => b.publishDate.valueOf() - a.publishDate.valueOf()),
+    },
+  }));
+}
+
+const { tagName, products, articles, posts } = Astro.props;
+---
+
+<BrowseLayout title={tagName}>
+  <h2 class="mb-4">{tagName}</h2>
+
+  {(products.length > 0) &&
+    <div class="row">
+      {products.map(item =>
+        <div class="col-md-6 col-lg-4">
+          <CardProduct
+            thumb_src={item.images[0] ?? ''}
+            thumb_alt={item.title}
+            title={item.title}
+            genus={item.genus}
+            tags={item.tags}
+            variants={item.variants}
+            position="left"
+            href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+          />
+        </div>
+      )}
+    </div>
+  }
+
+  {(articles.length > 0) &&
+    <div class="mt-5">
+      <h4 class="mb-4">Related Articles</h4>
+      <div class="col-12">
+        {articles.map(article =>
+          <ArticleTeaser
+            title={article.title}
+            excerpt={article.excerpt}
+            coverImage={article.coverImage}
+            publishDate={article.publishDate}
+            href={`${import.meta.env.BASE_URL}/articles/${article.id}/`}
+          />
+        )}
+      </div>
+    </div>
+  }
+
+  {(posts.length > 0) &&
+    <div class="mt-5">
+      <h4 class="mb-4">Related Blog Posts</h4>
+      <div class="col-12">
+        {posts.map(post =>
+          <ArticleTeaser
+            title={post.title}
+            excerpt={post.excerpt}
+            coverImage={post.coverImage}
+            publishDate={post.publishDate}
+            href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}
+          />
+        )}
+      </div>
+    </div>
+  }
+</BrowseLayout>

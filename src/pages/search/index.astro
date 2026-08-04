@@ -1,0 +1,9 @@
+---
+import BrowseLayout from '../../layouts/BrowseLayout.astro';
+import SearchResults from '../../components/search/SearchResults';
+---
+
+<BrowseLayout title="Search">
+  <h2 class="mb-4">Search</h2>
+  <SearchResults client:load />
+</BrowseLayout>

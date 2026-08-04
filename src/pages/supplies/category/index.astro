@@ -1,0 +1,29 @@
+---
+import BrowseLayout from '../../../layouts/BrowseLayout.astro';
+import { getCollection } from 'astro:content';
+import { slugify } from '../../../lib/slugify';
+
+const supplies = await getCollection('supplies');
+
+const counts = new Map<string, number>();
+for (const entry of supplies) {
+  counts.set(entry.data.category, (counts.get(entry.data.category) ?? 0) + 1);
+}
+
+const categories = Array.from(counts.entries())
+  .map(([category, count]) => ({ category, slug: slugify(category), count }))
+  .sort((a, b) => a.category.localeCompare(b.category));
+---
+
+<BrowseLayout title="Shop Supplies by Category">
+  <h2 class="mb-4">Shop Supplies by Category</h2>
+  <ul class="list-unstyled">
+    {categories.map(({ category, slug, count }) =>
+      <li class="mb-2">
+        <a href={`${import.meta.env.BASE_URL}/supplies/category/${slug}/`} class="font-weight-bold text-decoration-underline text-capitalize">
+          {category} <span class="text-body text-sm">({count})</span>
+        </a>
+      </li>
+    )}
+  </ul>
+</BrowseLayout>

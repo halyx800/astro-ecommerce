@@ -1,0 +1,46 @@
+---
+import BrowseLayout from '../../../layouts/BrowseLayout.astro';
+import CardProduct from '../../../components/products/cardProduct';
+import { getCollection } from 'astro:content';
+import { slugify } from '../../../lib/slugify';
+
+export async function getStaticPaths() {
+  const plants = await getCollection('plants');
+
+  const bySlug = new Map<string, { genusName: string; entries: typeof plants }>();
+  for (const entry of plants) {
+    const slug = slugify(entry.data.genus);
+    if (!bySlug.has(slug)) {
+      bySlug.set(slug, { genusName: entry.data.genus, entries: [] });
+    }
+    bySlug.get(slug)!.entries.push(entry);
+  }
+
+  return Array.from(bySlug.entries()).map(([slug, { genusName, entries }]) => ({
+    params: { genus: slug },
+    props: { genusName, entries },
+  }));
+}
+
+const { genusName, entries } = Astro.props;
+---
+
+<BrowseLayout title={genusName}>
+  <h2 class="mb-4">{genusName}</h2>
+  <div class="row">
+    {entries.map(entry =>
+      <div class="col-md-6 col-lg-4">
+        <CardProduct
+          thumb_src={entry.data.images[0] ?? ''}
+          thumb_alt={entry.data.displayName}
+          title={entry.data.displayName}
+          genus={entry.data.genus}
+          tags={entry.data.tags}
+          variants={entry.data.variants}
+          position="left"
+          href={`${import.meta.env.BASE_URL}/plants/${entry.id}/`}
+        />
+      </div>
+    )}
+  </div>
+</BrowseLayout>

@@ -7,53 +7,57 @@ export default function Footer() {
             <div className="copyright text-center text-sm text-muted text-lg-start">
               Copyright ©{" "}
               <script>document.write(new Date().getFullYear())</script>
-              &nbsp;Astro Ecommerce by 
-              <a
-                href="https://www.creative-tim.com"
-                className="text-dark ms-1"
-                target="_blank"
-              >
-                Creative Tim
-              </a>
-              .
+              &nbsp;Orchid Insanity.
             </div>
           </div>
           <div className="col-lg-6">
             <ul className="nav nav-footer justify-content-center justify-content-lg-end">
               <li className="nav-item">
                 <a
-                  href="https://www.creative-tim.com"
+                  href="/astro-ecommerce/"
                   className="nav-link text-sm text-muted"
-                  target="_blank"
                 >
-                  Creative Tim
+                  Home
                 </a>
               </li>
               <li className="nav-item">
                 <a
-                  href="https://www.creative-tim.com/presentation"
+                  href="/astro-ecommerce/shop/"
                   className="nav-link text-sm text-muted"
-                  target="_blank"
                 >
-                  About Us
+                  Shop
                 </a>
               </li>
               <li className="nav-item">
                 <a
-                  href="https://www.creative-tim.com/blog"
+                  href="/astro-ecommerce/articles/"
                   className="nav-link text-sm text-muted"
-                  target="_blank"
                 >
-                  Blog
+                  Blog &amp; Articles
                 </a>
               </li>
               <li className="nav-item">
                 <a
-                  href="https://www.creative-tim.com/license"
+                  href="/astro-ecommerce/growing-instructions/"
+                  className="nav-link text-sm text-muted"
+                >
+                  Growing Instructions
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  href="/astro-ecommerce/faq/"
+                  className="nav-link text-sm text-muted"
+                >
+                  FAQ
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  href="/astro-ecommerce/contact/"
                   className="nav-link text-sm pe-0 text-muted"
-                  target="_blank"
                 >
-                  License
+                  Contact
                 </a>
               </li>
             </ul>
@@ -63,5 +67,3 @@ export default function Footer() {
     </>
   );
 }
-
-

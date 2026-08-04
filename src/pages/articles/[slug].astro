@@ -1,0 +1,71 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../../assets/scss/astro-ecommerce.scss';
+import Navbar from '../../components/navbar';
+import { getCollection, render } from 'astro:content';
+import { slugify } from '../../lib/slugify';
+import { buildArticleSchema } from '../../lib/articleSchema';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles');
+  return articles.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+
+const pageUrl = new URL(`${import.meta.env.BASE_URL}/articles/${entry.id}/`, "https://www.orchidinsanity.com").toString();
+const articleSchema = buildArticleSchema({
+  type: "Article",
+  headline: data.title,
+  description: data.excerpt,
+  url: pageUrl,
+  image: data.coverImage ? new URL(`${import.meta.env.BASE_URL}${data.coverImage}`, "https://www.orchidinsanity.com").toString() : undefined,
+  datePublished: data.publishDate,
+});
+---
+
+<Layout
+  title={data.title}
+  description={data.excerpt}
+  image={data.coverImage}
+  type="article"
+  ogTitle={data.ogTitle}
+  ogDescription={data.ogDescription}
+>
+	<main>
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+    <Navbar client:load />
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12 col-lg-8">
+          {(data.coverImage) &&
+            <img
+              class="w-100 rounded-3 mb-4"
+              src={`${import.meta.env.BASE_URL}${data.coverImage}`}
+              alt={data.title}
+            />
+          }
+          <h1>{data.title}</h1>
+          <p class="text-body text-sm">
+            {data.publishDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+
+          {(data.tags.length > 0) &&
+            <div class="mb-4">
+              {data.tags.map(tag =>
+                <a href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} class="badge bg-secondary me-1 text-decoration-none">{tag}</a>
+              )}
+            </div>
+          }
+
+          <Content />
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

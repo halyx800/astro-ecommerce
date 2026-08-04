@@ -1,6 +1,6 @@
 ---
 genus: "Oncidium"
-isHybrid: true
+taxonomicStatus: "hybrid"
 hybridName: "Sharry Baby 'Red Fantasy'"
 cultivarName: "Red Fantasy"
 commonName: "Chocolate Orchid"
@@ -21,6 +21,13 @@ tags: ["fragrant blooms", "easy-to-grow"]
 images: ["/images/plants/oncidium-sharry-baby-red-fantasy-1.jpg"]
 featured: true
 publishDate: 2026-07-01
+relatedProducts:
+  - collection: "plants"
+    id: "cattleya-walkeriana"
+  - collection: "supplies"
+    id: "keiki-power-pro-cloning-paste"
+ogTitle: "This orchid smells like chocolate 🍫"
+ogDescription: "No joke — this hybrid actually smells like chocolate and vanilla when it blooms. One of the easiest orchids you can grow."
 ---
 
 A mass-propagated hybrid famous for its unmistakable chocolate-and-vanilla

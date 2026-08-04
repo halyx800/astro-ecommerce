@@ -1,0 +1,36 @@
+---
+import BrowseLayout from '../../layouts/BrowseLayout.astro';
+import { getCollection } from 'astro:content';
+import { slugify } from '../../lib/slugify';
+
+const plants = await getCollection('plants');
+const supplies = await getCollection('supplies');
+const articles = await getCollection('articles');
+const blogPosts = await getCollection('blogPosts');
+
+const counts = new Map<string, { tag: string; count: number }>();
+for (const entry of [...plants, ...supplies, ...articles, ...blogPosts]) {
+  for (const tag of entry.data.tags) {
+    const slug = slugify(tag);
+    const existing = counts.get(slug);
+    counts.set(slug, { tag, count: (existing?.count ?? 0) + 1 });
+  }
+}
+
+const tags = Array.from(counts.entries())
+  .map(([slug, { tag, count }]) => ({ slug, tag, count }))
+  .sort((a, b) => a.tag.localeCompare(b.tag));
+---
+
+<BrowseLayout title="Browse by Tag">
+  <h2 class="mb-4">Browse by Tag</h2>
+  <ul class="list-unstyled">
+    {tags.map(({ tag, slug, count }) =>
+      <li class="mb-2">
+        <a href={`${import.meta.env.BASE_URL}/tags/${slug}/`} class="font-weight-bold text-decoration-underline">
+          {tag} <span class="text-body text-sm">({count})</span>
+        </a>
+      </li>
+    )}
+  </ul>
+</BrowseLayout>

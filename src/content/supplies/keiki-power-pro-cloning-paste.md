@@ -14,6 +14,9 @@ stockStatus: "in-stock"
 tags: ["propagation"]
 images: ["/images/supplies/keiki-power-pro-1.jpg"]
 featured: false
+relatedProducts:
+  - collection: "plants"
+    id: "oncidium-sharry-baby-red-fantasy"
 ---
 
 A cytokinin-based paste applied to a node to induce keiki (baby plant)
