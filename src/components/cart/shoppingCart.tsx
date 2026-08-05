@@ -43,7 +43,7 @@ export default function ShoppingCart() {
       return;
     }
 
-    fetch(`${import.meta.env.BASE_URL}/product-index.json`)
+    fetch(`${import.meta.env.BASE_URL}product-index.json`)
       .then(res => res.json())
       .then((products: IndexedProduct[]) => {
         const skuToProduct = new Map<string, IndexedProduct>();
@@ -88,7 +88,7 @@ export default function ShoppingCart() {
 
         {(mounted && items.length === 0) &&
           <p className="text-center">
-            Your cart is empty. <a href={`${import.meta.env.BASE_URL}/`} className="font-weight-bold text-decoration-underline">Continue shopping</a>.
+            Your cart is empty. <a href={`${import.meta.env.BASE_URL}`} className="font-weight-bold text-decoration-underline">Continue shopping</a>.
           </p>
         }
 
@@ -125,7 +125,7 @@ export default function ShoppingCart() {
                     </li>
                   </ul>
                   <button className="btn btn-dark btn-lg w-100" disabled title="Checkout is not wired up yet">Checkout</button>
-                  <a href={`${import.meta.env.BASE_URL}/`} className="btn btn-white btn-lg w-100">Continue Shopping</a>
+                  <a href={`${import.meta.env.BASE_URL}`} className="btn btn-white btn-lg w-100">Continue Shopping</a>
                   <p className="text-center">Tax included. Shipping calculated at checkout.</p>
                 </div>
               </div>
@@ -146,7 +146,7 @@ export default function ShoppingCart() {
                   tags={item.tags}
                   variants={item.variants}
                   position="left"
-                  href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+                  href={`${import.meta.env.BASE_URL}${item.kind}/${item.id}/`}
                 />
               </div>
             )}

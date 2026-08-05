@@ -6,7 +6,7 @@ export default function SearchBox() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
-    window.location.href = `${import.meta.env.BASE_URL}/search/?q=${encodeURIComponent(query)}`;
+    window.location.href = `${import.meta.env.BASE_URL}search/?q=${encodeURIComponent(query)}`;
   }
 
   return (

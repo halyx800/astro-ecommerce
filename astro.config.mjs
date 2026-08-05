@@ -14,5 +14,4 @@ export default defineConfig({
     }),
   ],
   site: 'https://www.orchidinsanity.com',
-  base: '/astro-ecommerce'
 });

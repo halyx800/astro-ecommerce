@@ -14,28 +14,28 @@ export const GET: APIRoute = async () => {
       subtitle: entry.data.genus,
       tags: entry.data.tags,
       abbreviations: abbreviationsFor(entry.data.genus),
-      url: `${import.meta.env.BASE_URL}/plants/${entry.id}/`,
+      url: `${import.meta.env.BASE_URL}plants/${entry.id}/`,
     })),
     ...supplies.map(entry => ({
       title: entry.data.name,
       subtitle: entry.data.category,
       tags: entry.data.tags,
       abbreviations: [] as string[],
-      url: `${import.meta.env.BASE_URL}/supplies/${entry.id}/`,
+      url: `${import.meta.env.BASE_URL}supplies/${entry.id}/`,
     })),
     ...articles.map(entry => ({
       title: entry.data.title,
       subtitle: 'Article',
       tags: entry.data.tags,
       abbreviations: [] as string[],
-      url: `${import.meta.env.BASE_URL}/articles/${entry.id}/`,
+      url: `${import.meta.env.BASE_URL}articles/${entry.id}/`,
     })),
     ...blogPosts.map(entry => ({
       title: entry.data.title,
       subtitle: 'Blog Post',
       tags: entry.data.tags,
       abbreviations: [] as string[],
-      url: `${import.meta.env.BASE_URL}/blog/${entry.id}/`,
+      url: `${import.meta.env.BASE_URL}blog/${entry.id}/`,
     })),
   ];
 

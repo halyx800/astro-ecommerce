@@ -23,7 +23,7 @@ export default function SearchResults() {
       return;
     }
 
-    fetch(`${import.meta.env.BASE_URL}/search-index.json`)
+    fetch(`${import.meta.env.BASE_URL}search-index.json`)
       .then(res => res.json())
       .then((data: SearchEntry[]) => {
         const fuse = new Fuse(data, {

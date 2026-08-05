@@ -20,13 +20,13 @@ const { entry } = Astro.props;
 const { data } = entry;
 const { Content } = await render(entry);
 
-const pageUrl = new URL(`${import.meta.env.BASE_URL}/blog/${entry.id}/`, "https://www.orchidinsanity.com").toString();
+const pageUrl = new URL(`${import.meta.env.BASE_URL}blog/${entry.id}/`, "https://www.orchidinsanity.com").toString();
 const articleSchema = buildArticleSchema({
   type: "BlogPosting",
   headline: data.title,
   description: makeExcerpt(entry.body ?? ''),
   url: pageUrl,
-  image: data.coverImage ? new URL(`${import.meta.env.BASE_URL}${data.coverImage}`, "https://www.orchidinsanity.com").toString() : undefined,
+  image: data.coverImage ? new URL(`${import.meta.env.BASE_URL}${data.coverImage.replace(/^\//, '')}`, "https://www.orchidinsanity.com").toString() : undefined,
   datePublished: data.publishDate,
 });
 
@@ -61,7 +61,7 @@ const mentioned = mentionedEntries.map(r => ({
           {(data.coverImage) &&
             <img
               class="w-100 rounded-3 mb-4"
-              src={`${import.meta.env.BASE_URL}${data.coverImage}`}
+              src={`${import.meta.env.BASE_URL}${data.coverImage.replace(/^\//, '')}`}
               alt={data.title}
             />
           }
@@ -73,7 +73,7 @@ const mentioned = mentionedEntries.map(r => ({
           {(data.tags.length > 0) &&
             <div class="mb-4">
               {data.tags.map(tag =>
-                <a href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} class="badge bg-secondary me-1 text-decoration-none">{tag}</a>
+                <a href={`${import.meta.env.BASE_URL}tags/${slugify(tag)}/`} class="badge bg-secondary me-1 text-decoration-none">{tag}</a>
               )}
             </div>
           }
@@ -103,7 +103,7 @@ const mentioned = mentionedEntries.map(r => ({
                 tags={item.tags}
                 variants={item.variants}
                 position="left"
-                href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+                href={`${import.meta.env.BASE_URL}${item.kind}/${item.id}/`}
               />
             </div>
           )}

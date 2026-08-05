@@ -33,7 +33,7 @@ const posts = (await getCollection('blogPosts'))
             excerpt={entry.data.excerpt}
             coverImage={entry.data.coverImage}
             publishDate={entry.data.publishDate}
-            href={`${import.meta.env.BASE_URL}/articles/${entry.id}/`}
+            href={`${import.meta.env.BASE_URL}articles/${entry.id}/`}
           />
         )}
       </div>
@@ -49,7 +49,7 @@ const posts = (await getCollection('blogPosts'))
             excerpt={makeExcerpt(entry.body ?? '')}
             coverImage={entry.data.coverImage}
             publishDate={entry.data.publishDate}
-            href={`${import.meta.env.BASE_URL}/blog/${entry.id}/`}
+            href={`${import.meta.env.BASE_URL}blog/${entry.id}/`}
           />
         )}
       </div>

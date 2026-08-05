@@ -27,7 +27,7 @@ const tags = Array.from(counts.entries())
   <ul class="list-unstyled">
     {tags.map(({ tag, slug, count }) =>
       <li class="mb-2">
-        <a href={`${import.meta.env.BASE_URL}/tags/${slug}/`} class="font-weight-bold text-decoration-underline">
+        <a href={`${import.meta.env.BASE_URL}tags/${slug}/`} class="font-weight-bold text-decoration-underline">
           {tag} <span class="text-body text-sm">({count})</span>
         </a>
       </li>

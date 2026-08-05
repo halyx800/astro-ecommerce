@@ -19,7 +19,7 @@ const entries = (await getCollection('plants')).filter(entry => entry.data.taxon
           tags={entry.data.tags}
           variants={entry.data.variants}
           position="left"
-          href={`${import.meta.env.BASE_URL}/plants/${entry.id}/`}
+          href={`${import.meta.env.BASE_URL}plants/${entry.id}/`}
         />
       </div>
     )}

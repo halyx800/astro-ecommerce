@@ -18,9 +18,9 @@ const { entry } = Astro.props;
 const { data } = entry;
 const { Content } = await render(entry);
 
-const images = data.images.map(src => `${import.meta.env.BASE_URL}${src}`);
+const images = data.images.map(src => `${import.meta.env.BASE_URL}${src.replace(/^\//, '')}`);
 
-const pageUrl = new URL(`${import.meta.env.BASE_URL}/supplies/${entry.id}/`, "https://www.orchidinsanity.com").toString();
+const pageUrl = new URL(`${import.meta.env.BASE_URL}supplies/${entry.id}/`, "https://www.orchidinsanity.com").toString();
 const productSchema = buildProductSchema({
   name: data.name,
   description: makeExcerpt(entry.body ?? ''),
@@ -59,7 +59,7 @@ const related = relatedEntries.map(r => ({
     images={images}
     tags={data.tags}
     variants={data.variants}
-    href={`${import.meta.env.BASE_URL}/supplies/${entry.id}/`}
+    href={`${import.meta.env.BASE_URL}supplies/${entry.id}/`}
   />
 
   <div class="row mt-5">
@@ -84,7 +84,7 @@ const related = relatedEntries.map(r => ({
             tags={item.tags}
             variants={item.variants}
             position="left"
-            href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+            href={`${import.meta.env.BASE_URL}${item.kind}/${item.id}/`}
           />
         </div>
       )}

@@ -58,7 +58,7 @@ export default function CardProduct({
       <div className="card card-product border mb-5 shadow-xs border-radius-lg">
         <a href={href ?? "#"}>
           <div className="height-350">
-            <img className="w-100 h-100 p-4 rounded-top" src={`${import.meta.env.BASE_URL}${thumb_src}`} alt={thumb_alt} />
+            <img className="w-100 h-100 p-4 rounded-top" src={`${import.meta.env.BASE_URL}${thumb_src.replace(/^\//, '')}`} alt={thumb_alt} />
           </div>
           <div className={classList}>
             {(genus) &&
@@ -84,7 +84,7 @@ export default function CardProduct({
             {(tags && tags.length > 0) &&
               <div className="mb-2">
                 {tags.map(tag => (
-                  <a key={tag} href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} className="badge bg-secondary me-1 text-decoration-none">{tag}</a>
+                  <a key={tag} href={`${import.meta.env.BASE_URL}tags/${slugify(tag)}/`} className="badge bg-secondary me-1 text-decoration-none">{tag}</a>
                 ))}
               </div>
             }

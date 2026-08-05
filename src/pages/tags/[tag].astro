@@ -104,7 +104,7 @@ const { tagName, products, articles, posts } = Astro.props;
             tags={item.tags}
             variants={item.variants}
             position="left"
-            href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+            href={`${import.meta.env.BASE_URL}${item.kind}/${item.id}/`}
           />
         </div>
       )}
@@ -121,7 +121,7 @@ const { tagName, products, articles, posts } = Astro.props;
             excerpt={article.excerpt}
             coverImage={article.coverImage}
             publishDate={article.publishDate}
-            href={`${import.meta.env.BASE_URL}/articles/${article.id}/`}
+            href={`${import.meta.env.BASE_URL}articles/${article.id}/`}
           />
         )}
       </div>
@@ -138,7 +138,7 @@ const { tagName, products, articles, posts } = Astro.props;
             excerpt={post.excerpt}
             coverImage={post.coverImage}
             publishDate={post.publishDate}
-            href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}
+            href={`${import.meta.env.BASE_URL}blog/${post.id}/`}
           />
         )}
       </div>

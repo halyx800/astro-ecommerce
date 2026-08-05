@@ -114,7 +114,7 @@ export default function ProductOverview({
           {(tags && tags.length > 0) &&
             <div className="mb-3">
               {tags.map(tag => (
-                <a key={tag} href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} className="badge bg-secondary me-1 text-decoration-none">{tag}</a>
+                <a key={tag} href={`${import.meta.env.BASE_URL}tags/${slugify(tag)}/`} className="badge bg-secondary me-1 text-decoration-none">{tag}</a>
               ))}
             </div>
           }

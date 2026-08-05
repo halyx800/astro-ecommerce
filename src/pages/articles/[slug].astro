@@ -18,13 +18,13 @@ const { entry } = Astro.props;
 const { data } = entry;
 const { Content } = await render(entry);
 
-const pageUrl = new URL(`${import.meta.env.BASE_URL}/articles/${entry.id}/`, "https://www.orchidinsanity.com").toString();
+const pageUrl = new URL(`${import.meta.env.BASE_URL}articles/${entry.id}/`, "https://www.orchidinsanity.com").toString();
 const articleSchema = buildArticleSchema({
   type: "Article",
   headline: data.title,
   description: data.excerpt,
   url: pageUrl,
-  image: data.coverImage ? new URL(`${import.meta.env.BASE_URL}${data.coverImage}`, "https://www.orchidinsanity.com").toString() : undefined,
+  image: data.coverImage ? new URL(`${import.meta.env.BASE_URL}${data.coverImage.replace(/^\//, '')}`, "https://www.orchidinsanity.com").toString() : undefined,
   datePublished: data.publishDate,
 });
 ---
@@ -46,7 +46,7 @@ const articleSchema = buildArticleSchema({
           {(data.coverImage) &&
             <img
               class="w-100 rounded-3 mb-4"
-              src={`${import.meta.env.BASE_URL}${data.coverImage}`}
+              src={`${import.meta.env.BASE_URL}${data.coverImage.replace(/^\//, '')}`}
               alt={data.title}
             />
           }
@@ -58,7 +58,7 @@ const articleSchema = buildArticleSchema({
           {(data.tags.length > 0) &&
             <div class="mb-4">
               {data.tags.map(tag =>
-                <a href={`${import.meta.env.BASE_URL}/tags/${slugify(tag)}/`} class="badge bg-secondary me-1 text-decoration-none">{tag}</a>
+                <a href={`${import.meta.env.BASE_URL}tags/${slugify(tag)}/`} class="badge bg-secondary me-1 text-decoration-none">{tag}</a>
               )}
             </div>
           }

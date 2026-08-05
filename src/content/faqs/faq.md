@@ -4,7 +4,7 @@
 ## How do I care for my orchid after it arrives?
 
 Every genus has slightly different needs, so the best place to start is our
-[Growing Instructions](/astro-ecommerce/growing-instructions/) page — it covers
+[Growing Instructions](/growing-instructions/) page — it covers
 light, watering, and temperature guidance by type.
 
 ## What is the easiest kind of orchid to grow?

@@ -20,7 +20,7 @@ const genera = Array.from(counts.entries())
   <ul class="list-unstyled">
     {genera.map(({ genus, slug, count }) =>
       <li class="mb-2">
-        <a href={`${import.meta.env.BASE_URL}/plants/genus/${slug}/`} class="font-weight-bold text-decoration-underline">
+        <a href={`${import.meta.env.BASE_URL}plants/genus/${slug}/`} class="font-weight-bold text-decoration-underline">
           {genus} <span class="text-body text-sm">({count})</span>
         </a>
       </li>

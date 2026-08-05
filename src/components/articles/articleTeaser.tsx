@@ -19,7 +19,7 @@ export default function ArticleTeaser({
         {(coverImage) &&
           <img
             className="max-height-150 rounded-2 me-4"
-            src={`${import.meta.env.BASE_URL}${coverImage}`}
+            src={`${import.meta.env.BASE_URL}${coverImage.replace(/^\//, '')}`}
             alt={title}
           />
         }

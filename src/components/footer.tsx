@@ -14,7 +14,7 @@ export default function Footer() {
             <ul className="nav nav-footer justify-content-center justify-content-lg-end">
               <li className="nav-item">
                 <a
-                  href="/astro-ecommerce/"
+                  href={`${import.meta.env.BASE_URL}`}
                   className="nav-link text-sm text-muted"
                 >
                   Home
@@ -22,7 +22,7 @@ export default function Footer() {
               </li>
               <li className="nav-item">
                 <a
-                  href="/astro-ecommerce/shop/"
+                  href={`${import.meta.env.BASE_URL}shop/`}
                   className="nav-link text-sm text-muted"
                 >
                   Shop
@@ -30,7 +30,7 @@ export default function Footer() {
               </li>
               <li className="nav-item">
                 <a
-                  href="/astro-ecommerce/articles/"
+                  href={`${import.meta.env.BASE_URL}articles/`}
                   className="nav-link text-sm text-muted"
                 >
                   Blog &amp; Articles
@@ -38,7 +38,7 @@ export default function Footer() {
               </li>
               <li className="nav-item">
                 <a
-                  href="/astro-ecommerce/growing-instructions/"
+                  href={`${import.meta.env.BASE_URL}growing-instructions/`}
                   className="nav-link text-sm text-muted"
                 >
                   Growing Instructions
@@ -46,7 +46,7 @@ export default function Footer() {
               </li>
               <li className="nav-item">
                 <a
-                  href="/astro-ecommerce/faq/"
+                  href={`${import.meta.env.BASE_URL}faq/`}
                   className="nav-link text-sm text-muted"
                 >
                   FAQ
@@ -54,7 +54,7 @@ export default function Footer() {
               </li>
               <li className="nav-item">
                 <a
-                  href="/astro-ecommerce/contact/"
+                  href={`${import.meta.env.BASE_URL}contact/`}
                   className="nav-link text-sm pe-0 text-muted"
                 >
                   Contact

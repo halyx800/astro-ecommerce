@@ -46,7 +46,7 @@ const featured = [
     <PromoSectionLarge
       title="Welcome to Orchid Insanity!"
       full_description="Live orchids, growing supplies, and everything you need to keep them thriving."
-      pageHeaderBgImg={`${import.meta.env.BASE_URL}/images/bg2.jpg`}
+      pageHeaderBgImg={`${import.meta.env.BASE_URL}images/bg2.jpg`}
       pageHeaderMinVh="35vh"
     />
 
@@ -68,7 +68,7 @@ const featured = [
                     tags={item.tags}
                     variants={item.variants}
                     position="left"
-                    href={`${import.meta.env.BASE_URL}/${item.kind}/${item.id}/`}
+                    href={`${import.meta.env.BASE_URL}${item.kind}/${item.id}/`}
                   />
                 </div>
               )}
@@ -77,18 +77,18 @@ const featured = [
         }
 
         <p class="text-center text-body mb-10">
-          <a href={`${import.meta.env.BASE_URL}/plants/genus/`} class="font-weight-bold text-decoration-underline">Browse orchids by genus</a>
+          <a href={`${import.meta.env.BASE_URL}plants/genus/`} class="font-weight-bold text-decoration-underline">Browse orchids by genus</a>
           &nbsp;·&nbsp;
-          <a href={`${import.meta.env.BASE_URL}/supplies/category/`} class="font-weight-bold text-decoration-underline">Browse growing supplies</a>
+          <a href={`${import.meta.env.BASE_URL}supplies/category/`} class="font-weight-bold text-decoration-underline">Browse growing supplies</a>
           &nbsp;·&nbsp;
-          <a href={`${import.meta.env.BASE_URL}/tags/`} class="font-weight-bold text-decoration-underline">Browse by tag</a>
+          <a href={`${import.meta.env.BASE_URL}tags/`} class="font-weight-bold text-decoration-underline">Browse by tag</a>
         </p>
 
         {(articles.length > 0) &&
           <div class="mb-10">
             <div class="d-block text-center mb-5">
               <h3>From the Blog</h3>
-              <a class="text-dark font-weight-bold" href={`${import.meta.env.BASE_URL}/articles/`}>Read more articles &#62;</a>
+              <a class="text-dark font-weight-bold" href={`${import.meta.env.BASE_URL}articles/`}>Read more articles &#62;</a>
             </div>
             <div class="col-12">
               {articles.map(entry =>
@@ -97,7 +97,7 @@ const featured = [
                   excerpt={entry.data.excerpt}
                   coverImage={entry.data.coverImage}
                   publishDate={entry.data.publishDate}
-                  href={`${import.meta.env.BASE_URL}/articles/${entry.id}/`}
+                  href={`${import.meta.env.BASE_URL}articles/${entry.id}/`}
                 />
               )}
             </div>

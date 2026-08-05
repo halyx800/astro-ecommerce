@@ -11,7 +11,7 @@ const Navbar = () => {
       <div className="container px-1">
         <a
           className="navbar-brand ms-lg-0 "
-          href="/astro-ecommerce/"
+          href={`${import.meta.env.BASE_URL}`}
           style={{ fontFamily: "'Sansita', sans-serif", fontWeight: 700, fontSize: '2.625rem' }}
         >
           Orchid Insanit<span style={{ display: 'inline-block', transform: 'rotate(20deg)', marginLeft: '0.07em', position: 'relative', top: '0.1em' }}>y</span>
@@ -26,32 +26,32 @@ const Navbar = () => {
         <div className="collapse navbar-collapse" id="navigation">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href="/astro-ecommerce/">
+              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href={`${import.meta.env.BASE_URL}`}>
                 Home
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href="/astro-ecommerce/shop/">
+              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href={`${import.meta.env.BASE_URL}shop/`}>
                 Shop
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href="/astro-ecommerce/articles/">
+              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href={`${import.meta.env.BASE_URL}articles/`}>
                 Blog &amp; Articles
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href="/astro-ecommerce/growing-instructions/">
+              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href={`${import.meta.env.BASE_URL}growing-instructions/`}>
                 Growing Instructions
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href="/astro-ecommerce/faq/">
+              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href={`${import.meta.env.BASE_URL}faq/`}>
                 FAQ
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href="/astro-ecommerce/contact/">
+              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-1 " aria-current="page" href={`${import.meta.env.BASE_URL}contact/`}>
                 Contact
               </a>
             </li>
@@ -59,7 +59,7 @@ const Navbar = () => {
               <SearchBox />
             </li>
             <li className="nav-item">
-              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-2 position-relative" aria-current="page" href="/astro-ecommerce/shopping-cart/">
+              <a className="nav-link text-dark font-weight-bold d-flex align-items-center me-2 position-relative" aria-current="page" href={`${import.meta.env.BASE_URL}shopping-cart/`}>
                 <i className="bi bi-cart3 text-lg"></i>
                 {(itemCount > 0) &&
                   <span
