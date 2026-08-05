@@ -105,9 +105,32 @@ build territory — no database needed, no performance concern at this scale.
     otherwise.
   - Final social media integration approach (static links vs. embeds vs.
     manual curated grid).
-  - Deployment target — needs a host with serverless function support for
-    the Stripe Checkout session creation (Vercel/Netlify/Cloudflare are the
-    natural candidates over pure static hosting). Not chosen yet.
+  - **Deployment target — decided 2026-08-04: Cloudflare Pages + Workers.**
+    Compared against Vercel/Netlify specifically on the owner's three
+    concerns: (1) bot traffic silently running up a large bill — Cloudflare
+    Pages' free tier includes unlimited static bandwidth (Vercel/Netlify
+    meter bandwidth even on paid tiers, and Vercel specifically has a
+    public track record of bill-shock incidents from bot/scraper traffic),
+    plus Cloudflare's core business is bot/rate-limit protection at the
+    edge, sitting in front of the site by default; (2) speed/stability —
+    genuinely comparable across all three at this site's scale, not a
+    real differentiator; (3) room to add more technical capability later —
+    Cloudflare's Workers platform includes D1 (real serverless SQLite) and
+    KV storage, giving the most direct path to build the still-deferred
+    inventory-reservation or review-submission features without adding a
+    third-party service. Not yet done: actually creating the Cloudflare
+    account/project and connecting the GitHub repo (an external step the
+    owner does, not a code change); adding the `@astrojs/cloudflare`
+    adapter to `astro.config.mjs` is deliberately not done yet either,
+    since there's no dynamic endpoint (e.g. a checkout session function)
+    to actually run on it — adding the adapter before there's real server
+    code to deploy would be pure speculative setup. Do this when the first
+    real dynamic endpoint (checkout, or whatever comes first) is actually
+    being built.
+    This also directly resolves part of the inventory-concurrency question
+    below: if a reservation layer is built, Cloudflare's D1/KV is the
+    natural atomic store, decided alongside the host itself rather than as
+    a separate later choice.
   - Whether the top-level `stockStatus` field (in addition to per-variant
     stockStatus) is worth the duplication — flagged to the owner as a design
     choice they may want simplified.
@@ -142,6 +165,107 @@ build territory — no database needed, no performance concern at this scale.
     atomic store (hosted KV/Redis/tiny DB) instead of a literal file. Not
     yet decided — ties directly into the still-open deployment target
     decision above.
+
+- **Order management system — scoped 2026-08-05, not built.** Blocked on
+  the Cloudflare account actually being created; revisit once that
+  exists. Grew out of reopening the guest-checkout-vs-accounts question
+  (still leaning guest-only — see above) with a lighter goal: customers
+  can look up their own order without a real account, and the owner has
+  a way to manage orders and get them onto his own machine without
+  giving staff access to the Cloudflare account. Five pieces:
+
+  1. **D1 `orders` table** — the single source of truth. Sketch:
+     ```sql
+     CREATE TABLE orders (
+       id TEXT PRIMARY KEY,
+       email TEXT NOT NULL,
+       items TEXT NOT NULL,        -- JSON: what was purchased
+       total REAL NOT NULL,
+       status TEXT NOT NULL DEFAULT 'paid',  -- paid, processing, shipped, delivered, refunded
+       tracking_number TEXT,
+       created_at TEXT NOT NULL,
+       updated_at TEXT NOT NULL
+     );
+     ```
+  2. **Order creation — a Worker, triggered by a Square webhook.** Square
+     notifies this Worker when a payment completes; its only job is
+     writing one row into D1. Kept deliberately narrow (no file
+     handling, no email, nothing else in this path) so the
+     concurrency-sensitive part stays simple and safe under D1's real
+     transactions. Refunds arrive the same way (another Square webhook),
+     updating `status` automatically — payment-status changes are the
+     one part of "updated order status" that requires no manual work.
+  3. **Customer self-service lookup — email + magic link, not instant
+     results.** Customer enters their email; if D1 has orders under it,
+     a random short-lived token goes into KV (KV's native auto-expiry
+     fits a 15–30 min token well) and an emailed link
+     (`/orders/view?token=...`) is sent via a transactional email
+     service (Workers can't send mail directly — needs an account with
+     something like Postmark/Resend/Mailgun, a new dependency to set up).
+     Only clicking the real link renders the order page — proves inbox
+     ownership without passwords/accounts. **Always show the same
+     neutral response** ("if we have an order on file, check your
+     inbox") whether or not a match was found, both to avoid leaking
+     which emails have ordered and to give a wrong-email typo a soft,
+     non-scary failure mode. **Needs basic rate-limiting** (a few
+     attempts per IP per window, enforceable free at the Cloudflare
+     edge) since this is a public endpoint that triggers a DB read and
+     an outbound email per submission.
+  4. **Human fallback for failed lookups — owner's explicit call.**
+     Rather than engineer around every lookup edge case, a visible
+     "still not finding it? Contact us with your name and approximate
+     order date" link to the existing Contact page. Requires a small,
+     Cloudflare-Access-gated admin page (`/admin/orders/`, one shared
+     login just for the owner — configured entirely in the Cloudflare
+     dashboard, no custom password/session code to write or maintain,
+     same "let a specialist handle the sensitive part" instinct as using
+     Square's hosted checkout instead of a custom payment form) listing
+     all orders, where the owner marks status/adds a tracking number —
+     this is the other half of "updated order status," the part Square
+     has no way to know automatically (fulfillment, not payment).
+     Plain server-rendered Astro page (`prerender = false` for just this
+     route), not a JS dashboard — same pattern already used for FAQ/
+     articles, just reading D1 instead of markdown.
+  5. **Staff access to a plain order file, without touching Cloudflare —
+     the owner's explicit operational-security ask.** A completely
+     separate, decoupled piece from the Worker: a small script run on a
+     schedule (proposed: cron on this same VM, every 5–15 min or
+     whatever cadence feels "soon enough") that calls D1's normal HTTPS
+     REST API with the owner's own API token and writes the results to
+     a plain CSV file on the owner's own machine — opens directly in any
+     spreadsheet program. Only this script ever holds Cloudflare
+     credentials; the assistant never touches the account, dashboard, or
+     token. Since it's a read-only snapshot pulled from D1 (not an
+     append to a shared file), it can safely regenerate on every run
+     with no race condition. How the file then reaches the assistant
+     from the owner's machine (shared drive, email, etc.) is the owner's
+     own existing workflow, not something this system needs to solve.
+     **Explicitly rejected approach, for the record:** a Worker
+     appending to a file and SFTP-ing it out directly. Two real problems
+     — SFTP/SSH doesn't fit naturally in the Workers runtime (no
+     built-in client, unusual to implement), and "append to a shared
+     file" reintroduces the same lost-update race condition already
+     ruled out for the original flat-file order-history idea (two
+     concurrent orders could each read-modify-write the same file and
+     silently lose one). Decoupling "write the order" (Worker → D1) from
+     "get a copy to my computer" (owner's own script, pulling not
+     pushing) avoids both problems at once.
+
+  **Real sequencing dependency, same as the hosting adapter decision
+  above:** none of this can be built for real yet. It needs, in order:
+  the Cloudflare account created and repo connected, the `@astrojs/
+  cloudflare` adapter actually added (deliberately not done yet either),
+  Square finalized (still just "considering," not decided), and the
+  checkout flow itself built — this order-management system is entirely
+  downstream of orders actually existing to manage. Fine to keep
+  refining the design in the meantime; nothing here should be built
+  ahead of those.
+
+  **Related task, same trigger point:** wiring up GA4's `purchase`
+  ecommerce event (see the Google Analytics section further down) should
+  happen at the same moment the Worker writes a completed order to D1 —
+  one checkout-completion event, two consequences, not two separate
+  efforts.
 
 ---
 
@@ -690,6 +814,26 @@ To finish: owner creates a free GA4 property (steps discussed
 account, for the same handoff-access reason as Google Business Profile),
 gets the Measurement ID (`G-XXXXXXXXXX`), and it's a one-line edit in
 `src/lib/analytics.ts` to go live.
+
+**Open task, added 2026-08-05: wire up GA4's `purchase` ecommerce event
+at checkout completion, not just page views.** Raised from a real
+observation on the WooCommerce site being migrated away from: its
+native order-attribution feature ties completed sales to a specific
+traffic source (owner noticed several sales attributed to ChatGPT
+referrals). The placeholder GA4 setup above only tracks page views —
+that only attributes *visits* to a source, not completed *purchases*.
+To get the same "this specific sale came from X" visibility WooCommerce
+already provides, the checkout flow needs to fire GA4's `purchase` event
+(order total, items, transaction ID) via `gtag()` at the moment an order
+completes — GA4 then automatically ties that event back to the
+visitor's original session source. **Natural point to build this:** the
+same moment the Worker writes a completed order into D1 in the
+order-management system (see the scoped design above) — checkout
+completion is one event with two consequences (write to D1, fire GA4's
+purchase event), not two separate features. Not yet built — blocked on
+the same prerequisites as the order-management system (Cloudflare
+account, Square finalized, checkout itself built) plus a real GA4
+Measurement ID actually existing.
 
 **Blog posts — full design resolved 2026-08-01, not built yet.**
 - New `blogPosts` collection: title, Markdown body, tags (no category —

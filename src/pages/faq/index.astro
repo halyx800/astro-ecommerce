@@ -15,9 +15,15 @@ const { Content } = entry ? await render(entry) : { Content: null };
       <h1 class="h2 mb-4">Frequently Asked Questions</h1>
 
       {Content
-        ? <Content />
+        ? <div class="faq-content"><Content /></div>
         : <p class="text-body">No FAQs yet.</p>
       }
     </div>
   </main>
 </Layout>
+
+<style>
+  .faq-content :global(h2) {
+    font-size: 1.25rem;
+  }
+</style>
