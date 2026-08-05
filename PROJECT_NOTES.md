@@ -168,6 +168,57 @@ build territory — no database needed, no performance concern at this scale.
     Dart Sass major version). Pre-existing in the theme, not caused by
     this deploy, harmless for now — worth a cleanup pass eventually, not
     urgent.
+
+    **`base` path finally removed, and the bug that removal exposed —
+    2026-08-05, same day.** The owner visited the live test URL and
+    reported it looked completely unstyled with no interactivity — raw
+    text and links only. Diagnosed via direct `curl` against the live
+    deployment (not guessed): every CSS/JS/link path in the built HTML
+    was prefixed `/astro-ecommerce/...`, a path that returned 404 on the
+    real deployment, since Cloudflare serves the site at the domain
+    root. This was the long-flagged `base: '/astro-ecommerce'` leftover
+    from the original Creative Tim GitHub Pages template, finally
+    causing real, visible breakage rather than just being a known future
+    cleanup item. Removed from `astro.config.mjs`, plus two follow-on
+    fixes it exposed:
+    - `public/robots.txt`'s hardcoded sitemap URL and one hardcoded
+      internal link in `src/content/faqs/faq.md` both had the
+      `/astro-ecommerce` prefix baked in as literal text (not derived
+      from config) — fixed directly. The XML sitemap itself needed no
+      manual fix, since `@astrojs/sitemap` derives its URLs from
+      `site`/`base` automatically.
+    - **A second, sitewide bug the removal exposed:** `navbar.tsx` and
+      `footer.tsx` had `/astro-ecommerce/...` hardcoded directly as
+      literal strings, not using `import.meta.env.BASE_URL` like the
+      rest of the codebase — invisible before now because the hardcoded
+      value happened to match the configured `base`. Beyond that, fixing
+      those two files surfaced a deeper, sitewide issue: the codebase's
+      standard pattern, `` `${import.meta.env.BASE_URL}/path` ``, quietly
+      depended on `BASE_URL` never itself ending in a slash — true for
+      the old `/astro-ecommerce` value, false for Astro's actual default
+      of `/` once `base` is unset. Every occurrence of that pattern was
+      producing a doubled leading slash (`//shop/`, `//images/...`) —
+      not cosmetic: a URL starting with `//` is protocol-relative,
+      meaning a browser reads what follows as a *hostname*, so
+      `href="//shop/"` would try to navigate to a nonexistent site
+      called "shop", not this site's `/shop/` page.
+      Found and fixed **61 occurrences across 24 files** — first a
+      scoped sitewide find/replace for the literal-slash case
+      (`` BASE_URL}/path `` → `` BASE_URL}path ``, safe since 100%
+      uniform), then a second, separate pass for the interpolation-to-
+      interpolation case (`` `${BASE_URL}${src}` `` where `src` is an
+      image/cover-image path that itself already starts with `/`, e.g.
+      `data.images`, `data.coverImage`, `thumb_src` — fixed by stripping
+      the value's own leading slash at each of the ~9 real call sites
+      before concatenating, since `item.kind`-based uses of the same
+      interpolation pattern, e.g. `` `${BASE_URL}${item.kind}/...` ``,
+      were already correct and didn't need touching — `item.kind` is a
+      bare collection name like `"plants"`, no leading slash).
+      Verified via a full scan of real build output (not just source
+      code) for any remaining `//` in an `href`/`src`, and a sitewide
+      grep for any leftover `astro-ecommerce` string anywhere in
+      `dist/` — both came back clean. Pushed; Cloudflare's Git-connected
+      deploy should pick it up automatically on the next build.
   - Whether the top-level `stockStatus` field (in addition to per-variant
     stockStatus) is worth the duplication — flagged to the owner as a design
     choice they may want simplified.
