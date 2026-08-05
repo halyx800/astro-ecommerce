@@ -131,6 +131,43 @@ build territory — no database needed, no performance concern at this scale.
     below: if a reservation layer is built, Cloudflare's D1/KV is the
     natural atomic store, decided alongside the host itself rather than as
     a separate later choice.
+
+    **First real deployment — 2026-08-05.** Owner created the Cloudflare
+    account and connected the GitHub repo via Workers & Pages. One real
+    surprise: Cloudflare's dashboard-connected deploy flow turned out to
+    use their newer unified Workers model (deploy command `npx wrangler
+    deploy`, driven by a `wrangler.jsonc` config file naming the static
+    assets directory), not the classic separate "Pages" product with
+    dashboard-set build command/output directory fields — confirmed via
+    Cloudflare's own current docs rather than guessed, since this project
+    had assumed the older Pages model. Added `wrangler.jsonc` at the repo
+    root:
+    ```jsonc
+    {
+      "name": "astro-ecommerce",
+      "compatibility_date": "2026-08-05",
+      "assets": { "directory": "./dist" }
+    }
+    ```
+    Important: this is *not* the `@astrojs/cloudflare` SSR adapter
+    discussed above — it's a much lighter, purely declarative file that
+    only tells Wrangler where the already-built static files live. It
+    doesn't change how Astro builds or add any server-rendering
+    capability, so adding it didn't violate the "wait for real dynamic
+    code" principle above — it's baseline deployment plumbing needed for
+    *any* deploy through Cloudflare's current model, static or not.
+    Confirmed working: build succeeded on Cloudflare's infrastructure
+    (28 pages, matching local builds exactly) and deployed live to
+    `https://astro-ecommerce.deanyhung.workers.dev` — a public test URL,
+    **not** the real domain, which is untouched and still pointing at
+    the WooCommerce site. Domain cutover is a separate, deliberate step
+    for later.
+    One cosmetic note for later: build logs show ~450+ Sass deprecation
+    warnings from the vendored Bootstrap SCSS (old `@import` syntax,
+    `darken()`/`lighten()`, etc. — all slated for removal in a future
+    Dart Sass major version). Pre-existing in the theme, not caused by
+    this deploy, harmless for now — worth a cleanup pass eventually, not
+    urgent.
   - Whether the top-level `stockStatus` field (in addition to per-variant
     stockStatus) is worth the duplication — flagged to the owner as a design
     choice they may want simplified.
